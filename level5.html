@@ -71,6 +71,17 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    #startButton {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -84,11 +95,17 @@
   <div id="board"></div>
   <div id="message">🎉 你成功守護了海龜們 牠們能快樂生活了！</div>
   <button id="restartButton" onclick="location.href='index.html'">重新遊玩</button>
+  <button id="startButton">開始遊戲</button>
+
+  <!-- 音樂檔案 -->
+  <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
 
   <script>
     const board = document.getElementById('board');
     const message = document.getElementById('message');
     const restartButton = document.getElementById('restartButton');
+    const startButton = document.getElementById('startButton');
+    const backgroundMusic = document.getElementById('backgroundMusic');
 
     const size = 4;
     const tiles = [];
@@ -153,7 +170,12 @@
       }
     }
 
-    init();
+    // 播放音樂
+    startButton.onclick = () => {
+      backgroundMusic.play();
+      init();  // 開始遊戲
+    };
+
   </script>
 </body>
 </html>
