@@ -60,20 +60,8 @@
       display: none;
     }
 
-    #restartButton {
-      display: none;
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
     #startButton {
-      margin-top: 15px;
+      margin-top: 20px;
       padding: 10px 20px;
       font-size: 18px;
       background: #007bff;
@@ -94,16 +82,14 @@
 
   <div id="board"></div>
   <div id="message">🎉 你成功守護了海龜們 牠們能快樂生活了！</div>
-  <button id="restartButton" onclick="location.href='index.html'">重新遊玩</button>
   <button id="startButton">開始遊戲</button>
 
-  <!-- 音樂檔案 -->
+  <!-- 背景音樂 -->
   <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
 
   <script>
     const board = document.getElementById('board');
     const message = document.getElementById('message');
-    const restartButton = document.getElementById('restartButton');
     const startButton = document.getElementById('startButton');
     const backgroundMusic = document.getElementById('backgroundMusic');
 
@@ -119,7 +105,6 @@
       tiles.length = 0;
       selected = [];
       message.style.display = 'none';
-      restartButton.style.display = 'none';
 
       for (let i = 0; i < size * size; i++) {
         const tile = document.createElement('div');
@@ -166,16 +151,17 @@
       const isComplete = tiles.every(tile => tile.dataset.correct === tile.dataset.current);
       if (isComplete) {
         message.style.display = 'block';
-        restartButton.style.display = 'inline-block';
       }
     }
 
-    // 播放音樂
+    // 點擊開始遊戲按鈕後執行初始化與播放音樂
     startButton.onclick = () => {
-      backgroundMusic.play();
-      init();  // 開始遊戲
+      startButton.style.display = 'none';  // 隱藏按鈕
+      backgroundMusic.play().catch(e => {
+        console.warn("音樂播放失敗：", e);
+      });
+      init();
     };
-
   </script>
 </body>
 </html>
