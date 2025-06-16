@@ -123,9 +123,6 @@
     <div id="fail-msg">點到貝殼了，請按 Enter 重新開始</div>
   </div>
 
-  <!-- Add audio element for background music -->
-  <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
-
   <script>
     const gameArea = document.getElementById('game-area');
     const trashCount = 10;
@@ -233,14 +230,11 @@
       document.getElementById('game-title').style.display = 'block';
       document.getElementById('turtle').style.display = 'block';
       createObjects();
-      // Play background music when the game starts
-      const backgroundMusic = document.getElementById('backgroundMusic');
-      backgroundMusic.play();
     }
 
-    function nextStage() {
-      window.location.href = 'level3.html';
-    }
+   function nextStage() {
+  window.location.href = 'level3.html';
+}
 
     window.addEventListener('keydown', e => {
       if (gameOver && e.key === 'Enter') {

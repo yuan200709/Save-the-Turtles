@@ -122,9 +122,6 @@
     <button id="nextButton" onclick="location.href='level4.html'">前往第四關</button>
   </div>
 
-  <!-- Add audio element for background music -->
-  <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
-
   <script>
     const gameArea = document.getElementById('gameArea');
     const timerDisplay = document.getElementById('timer');
@@ -254,9 +251,6 @@
       info.style.display = 'block';
       spawnItem();
       startTimer();
-      // Play background music when the game starts
-      const backgroundMusic = document.getElementById('backgroundMusic');
-      backgroundMusic.play();
     };
   </script>
 </body>
