@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>第二關：海龜求救</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    body {
+      background-image: url('images/beach.png');
+      background-size: cover;
+      background-position: center;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0a5c5a;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 8px 12px;
+      margin: 0;
+      border-radius: 8px;
+      font-size: 20px;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    #game-area {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .turtle {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: auto;
+      z-index: 5;
+      user-select: none;
+    }
+
+    .trash, .shell {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      z-index: 3;
+      user-select: none;
+    }
+
+    #msg, #fail-msg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: bold;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px 30px;
+      border-radius: 12px;
+      display: none;
+      text-align: center;
+      z-index: 30;
+    }
+
+    #msg {
+      color: green;
+    }
+
+    #fail-msg {
+      color: red;
+    }
+
+    .btn {
+      margin-top: 16px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #006c6b;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #instructions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body>
+  <div id="instructions">
+    <h2>遊戲說明</h2>
+    <p>1. 用滑鼠左鍵點擊垃圾</p>
+    <p>2. 若點到貝殼將重新開始</p>
+    <button class="btn" onclick="startGame()">開始遊戲</button>
+  </div>
+
+  <h1 style="display:none;" id="game-title">第二關：海龜求救！</h1>
+
+  <div id="game-area">
+    <img src="images/sea-turtle.png" class="turtle" id="turtle" style="display:none;" />
+    <div id="msg">
+      太好了！海龜成功回到海裡了！<br />
+      <button class="btn" onclick="nextStage()">前往第三關</button>
+    </div>
+    <div id="fail-msg">點到貝殼了，請按 Enter 重新開始</div>
+  </div>
+
+  <!-- Add audio element for background music -->
+  <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
+
+  <script>
+    const gameArea = document.getElementById('game-area');
+    const trashCount = 10;
+    const shellCount = 10;
+    let remainingTrash = trashCount;
+    let gameOver = false;
+
+    const objectSize = 50;
+
+    const titleArea = { x: 10, y: 10, width: 200, height: 50 };
+    const turtleArea = {
+      width: 100,
+      height: 100,
+      x: window.innerWidth / 2 - 50,
+      y: window.innerHeight - 120
+    };
+
+    const placedPositions = [];
+
+    function isOverlapping(x, y) {
+      for (const pos of placedPositions) {
+        const dx = pos.x - x;
+        const dy = pos.y - y;
+        if (Math.sqrt(dx * dx + dy * dy) < 60) return true;
+      }
+      return false;
+    }
+
+    function isInTitleArea(x, y) {
+      return !(x + objectSize < titleArea.x ||
+               x > titleArea.x + titleArea.width ||
+               y + objectSize < titleArea.y ||
+               y > titleArea.y + titleArea.height);
+    }
+
+    function isInTurtleArea(x, y) {
+      return !(x + objectSize < turtleArea.x ||
+               x > turtleArea.x + turtleArea.width ||
+               y + objectSize < turtleArea.y ||
+               y > turtleArea.y + turtleArea.height);
+    }
+
+    function isInRestrictedArea(x, y) {
+      return isInTitleArea(x, y) || isInTurtleArea(x, y);
+    }
+
+    function getValidPosition() {
+      let x, y, attempts = 0;
+      do {
+        x = Math.floor(Math.random() * (window.innerWidth - objectSize));
+        y = Math.floor(Math.random() * (window.innerHeight - objectSize));
+        attempts++;
+        if (attempts > 1000) break;
+      } while (isOverlapping(x, y) || isInRestrictedArea(x, y));
+      return { x, y };
+    }
+
+    function createObjects() {
+      for (let i = 0; i < trashCount; i++) {
+        const trash = document.createElement('img');
+        trash.src = 'images/trash.png';
+        trash.className = 'trash';
+
+        const pos = getValidPosition();
+        placedPositions.push(pos);
+
+        trash.style.left = `${pos.x}px`;
+        trash.style.top = `${pos.y}px`;
+
+        trash.onclick = () => {
+          if (gameOver) return;
+          trash.remove();
+          remainingTrash--;
+          if (remainingTrash === 0) {
+            document.getElementById('msg').style.display = 'block';
+          }
+        };
+
+        gameArea.appendChild(trash);
+      }
+
+      for (let i = 0; i < shellCount; i++) {
+        const shell = document.createElement('img');
+        shell.src = 'images/shell.png';
+        shell.className = 'shell';
+
+        const pos = getValidPosition();
+        placedPositions.push(pos);
+
+        shell.style.left = `${pos.x}px`;
+        shell.style.top = `${pos.y}px`;
+
+        shell.onclick = () => {
+          if (gameOver) return;
+          gameOver = true;
+          document.getElementById('fail-msg').style.display = 'block';
+        };
+
+        gameArea.appendChild(shell);
+      }
+    }
+
+    function startGame() {
+      document.getElementById('instructions').style.display = 'none';
+      document.getElementById('game-title').style.display = 'block';
+      document.getElementById('turtle').style.display = 'block';
+      createObjects();
+      // Play background music when the game starts
+      const backgroundMusic = document.getElementById('backgroundMusic');
+      backgroundMusic.play();
+    }
+
+    function nextStage() {
+      window.location.href = 'level3.html';
+    }
+
+    window.addEventListener('keydown', e => {
+      if (gameOver && e.key === 'Enter') {
+        location.reload();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      location.reload();
+    });
+  </script>
+</body>
+</html>
