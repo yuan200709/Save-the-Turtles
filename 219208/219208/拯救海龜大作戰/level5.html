@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>第五關:拼圖遊戲</title>
+  <style>
+    body {
+      background: #f0f0f0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 30px;
+    }
+
+    #level-title {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    #instructions {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px 25px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      max-width: 400px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-template-rows: repeat(4, 100px);
+      gap: 2px;
+    }
+
+    .tile {
+      width: 100px;
+      height: 100px;
+      background-image: url('images/puzzle.jpg');
+      background-size: 400px 400px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 24px;
+      color: green;
+      display: none;
+    }
+
+    #startButton {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="level-title">第五關 拼圖遊戲</div>
+
+  <div id="instructions">
+     用滑鼠點選兩張想交換位置的圖片來完成拼圖
+  </div>
+
+  <div id="board"></div>
+  <div id="message">🎉 你成功守護了海龜們 牠們能快樂生活了！</div>
+  <button id="startButton">開始遊戲</button>
+
+  <!-- 背景音樂 -->
+  <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
+
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    const startButton = document.getElementById('startButton');
+    const backgroundMusic = document.getElementById('backgroundMusic');
+
+    const size = 4;
+    const tiles = [];
+    let selected = [];
+
+    function init() {
+      const order = [...Array(size * size).keys()];
+      shuffle(order);
+
+      board.innerHTML = '';
+      tiles.length = 0;
+      selected = [];
+      message.style.display = 'none';
+
+      for (let i = 0; i < size * size; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.dataset.correct = i;
+        tile.dataset.current = order[i];
+        tile.style.backgroundPosition = `-${(order[i] % size) * 100}px -${Math.floor(order[i] / size) * 100}px`;
+        tile.addEventListener('click', () => handleClick(i));
+        board.appendChild(tile);
+        tiles.push(tile);
+      }
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function handleClick(index) {
+      if (selected.length === 0) {
+        selected.push(index);
+        tiles[index].style.border = '2px solid red';
+      } else if (selected.length === 1 && selected[0] !== index) {
+        const first = selected[0];
+        const second = index;
+
+        const temp = tiles[first].dataset.current;
+        tiles[first].dataset.current = tiles[second].dataset.current;
+        tiles[second].dataset.current = temp;
+
+        tiles[first].style.backgroundPosition = `-${(tiles[first].dataset.current % size) * 100}px -${Math.floor(tiles[first].dataset.current / size) * 100}px`;
+        tiles[second].style.backgroundPosition = `-${(tiles[second].dataset.current % size) * 100}px -${Math.floor(tiles[second].dataset.current / size) * 100}px`;
+
+        tiles[first].style.border = '1px solid #ccc';
+        selected = [];
+
+        checkWin();
+      }
+    }
+
+    function checkWin() {
+      const isComplete = tiles.every(tile => tile.dataset.correct === tile.dataset.current);
+      if (isComplete) {
+        message.style.display = 'block';
+      }
+    }
+
+    // 點擊開始遊戲按鈕後執行初始化與播放音樂
+    startButton.onclick = () => {
+      startButton.style.display = 'none';  // 隱藏按鈕
+      backgroundMusic.play().catch(e => {
+        console.warn("音樂播放失敗：", e);
+      });
+      init();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>拯救海龜大作戰 - 第一關</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
+
+    #game {
+      width: 100vw;
+      height: 100vh;
+      background: url('images/ocean.png') no-repeat center center;
+      background-size: cover;
+      position: relative;
+    }
+
+    #gameTitle {
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px 15px;
+      font-size: 20px;
+      border-radius: 8px;
+      z-index: 10;
+    }
+
+    #instructions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-size: 18px;
+      z-index: 20;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      text-align: left;
+    }
+
+    #instructions h2 {
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+
+    #startButton {
+      display: block;
+      margin: 20px auto 0;
+      font-size: 18px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    #turtle {
+      width: 60px;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .garbage {
+      width: 40px;
+      position: absolute;
+      top: 0;
+    }
+
+    #message {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-size: 24px;
+      display: none;
+      z-index: 10;
+    }
+
+    #nextLevelBtn {
+      display: none;
+      position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div id="gameTitle">拯救海龜大作戰</div>
+
+    <div id="instructions">
+      <h2>遊戲說明</h2>
+      <p>1. 用鍵盤的上下左右鍵讓海龜移動</p>
+      <p>2. 避開垃圾，抵達畫面上方的海洋即成功</p>
+      <p>3. 若碰到垃圾必須重新開始</p>
+      <button id="startButton">開始遊戲</button>
+    </div>
+
+    <img id="turtle" src="images/sea-turtle.png" alt="海龜">
+    <div id="message">你被垃圾困住了！按 Enter 重新開始</div>
+    <button id="nextLevelBtn">前往第二關</button>
+
+    <!-- Add audio element for background music -->
+    <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
+  </div>
+
+  <script>
+    const game = document.getElementById('game');
+    const turtle = document.getElementById('turtle');
+    const message = document.getElementById('message');
+    const nextLevelBtn = document.getElementById('nextLevelBtn');
+    const instructions = document.getElementById('instructions');
+    const startButton = document.getElementById('startButton');
+    const backgroundMusic = document.getElementById('backgroundMusic');
+
+    let gameOver = false;
+    let gameStarted = false;
+    let turtleX = window.innerWidth / 2 - 30;
+    let turtleY = window.innerHeight - 80;
+
+    function setTurtlePos() {
+      turtle.style.left = turtleX + 'px';
+      turtle.style.top = turtleY + 'px';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!gameStarted) return;
+      if (gameOver && e.key === 'Enter') location.reload();
+      if (gameOver) return;
+
+      const step = 20;
+      if (e.key === 'ArrowLeft') turtleX -= step;
+      if (e.key === 'ArrowRight') turtleX += step;
+      if (e.key === 'ArrowUp') turtleY -= step;
+      if (e.key === 'ArrowDown') turtleY += step;
+
+      turtleX = Math.max(0, Math.min(window.innerWidth - 60, turtleX));
+      turtleY = Math.max(0, Math.min(window.innerHeight - 60, turtleY));
+
+      setTurtlePos();
+
+      if (turtleY <= 0) {
+        gameOver = true;
+        message.textContent = '成功拯救海龜！';
+        message.style.display = 'block';
+        nextLevelBtn.style.display = 'block';
+      }
+    });
+
+    nextLevelBtn.addEventListener('click', () => {
+      window.location.href = 'level2.html';
+    });
+
+    function spawnGarbage() {
+      if (!gameStarted || gameOver) return;
+
+      const garbage = document.createElement('img');
+      garbage.src = 'images/garbage.png';
+      garbage.className = 'garbage';
+      const x = Math.random() * (window.innerWidth - 40);
+      garbage.style.left = x + 'px';
+      game.appendChild(garbage);
+
+      let y = 0;
+      const fall = setInterval(() => {
+        if (gameOver || !gameStarted) {
+          clearInterval(fall);
+          garbage.remove();
+          return;
+        }
+
+        y += 5;
+        garbage.style.top = y + 'px';
+
+        const turtleRect = turtle.getBoundingClientRect();
+        const garbageRect = garbage.getBoundingClientRect();
+
+        const collided = !(
+          turtleRect.right < garbageRect.left ||
+          turtleRect.left > garbageRect.right ||
+          turtleRect.bottom < garbageRect.top ||
+          turtleRect.top > garbageRect.bottom
+        );
+
+        if (collided) {
+          gameOver = true;
+          message.textContent = '你被垃圾困住了！按 Enter 重新開始';
+          message.style.display = 'block';
+          clearInterval(fall);
+        }
+
+        if (y > window.innerHeight) {
+          garbage.remove();
+          clearInterval(fall);
+        }
+      }, 30);
+    }
+
+    // 每 300ms 掉落一個垃圾
+    setInterval(spawnGarbage, 300);
+    setTurtlePos();
+
+    startButton.addEventListener('click', () => {
+      instructions.style.display = 'none';
+      gameStarted = true;
+      // Play background music when the game starts
+      backgroundMusic.play();
+    });
+  </script>
+</body>
+</html>
