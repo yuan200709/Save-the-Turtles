@@ -118,6 +118,9 @@
     <img id="turtle" src="images/sea-turtle.png" alt="海龜">
     <div id="message">你被垃圾困住了！按 Enter 重新開始</div>
     <button id="nextLevelBtn">前往第二關</button>
+
+    <!-- Add audio element for background music -->
+    <audio id="backgroundMusic" src="images/sunny.mp3" preload="auto"></audio>
   </div>
 
   <script>
@@ -127,6 +130,7 @@
     const nextLevelBtn = document.getElementById('nextLevelBtn');
     const instructions = document.getElementById('instructions');
     const startButton = document.getElementById('startButton');
+    const backgroundMusic = document.getElementById('backgroundMusic');
 
     let gameOver = false;
     let gameStarted = false;
@@ -218,6 +222,8 @@
     startButton.addEventListener('click', () => {
       instructions.style.display = 'none';
       gameStarted = true;
+      // Play background music when the game starts
+      backgroundMusic.play();
     });
   </script>
 </body>
